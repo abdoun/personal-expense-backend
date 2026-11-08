@@ -11,19 +11,79 @@ users, expense categories, and expenses, and is designed to work with the
 - Doctrine ORM
 - MySQL
 
-## API
+## API routes
 
-The API is organized around three resource groups:
+The base URL is `http://localhost` when running with the default Docker Compose
+ports. Routes are defined in the controllers and use JSON request bodies.
 
-| Resource | Base path |
-| --- | --- |
-| Users | `/users` |
-| Categories | `/categories` |
-| Expenses | `/expenses` |
+### Users
 
-Endpoints accept the HTTP methods declared by each route. Many endpoints expect
-JSON request bodies; see the controllers in `src/Controller` for request fields
-and response formats.
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/users/login` | Display the sign-in form |
+| `POST` | `/users/signin` | Sign in; returns the user ID or `null` |
+| `POST` | `/users/` | List users (requires credentials) |
+| `GET`, `POST` | `/users/{id}` | Get a user and their categories (requires that user's credentials) |
+
+### Categories
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `POST` | `/categories/` | List categories for the authenticated user |
+| `POST` | `/categories/add` | Create a category |
+| `POST` | `/categories/{id}` | Get a category |
+| `PATCH` | `/categories/update/{id}` | Update a category |
+| `DELETE` | `/categories/delete/{id}` | Delete a category |
+| `POST` | `/categories/user/{id}` | List categories for the authenticated user ID |
+
+### Expenses
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `POST` | `/expenses/` | List expenses |
+| `POST` | `/expenses/add` | Create an expense |
+| `POST` | `/expenses/{id}` | Get an expense |
+| `PATCH` | `/expenses/update/{id}` | Update an expense |
+| `DELETE` | `/expenses/delete/{id}` | Delete an expense |
+| `POST` | `/expenses/category/{id}` | List expenses for a category |
+| `POST` | `/expenses/category/{id}/count` | Count expenses for a category |
+| `POST` | `/expenses/user/{id}` | List expenses for a user |
+| `POST` | `/expenses/user/{id}/count` | Count expenses for a user |
+
+### Request examples
+
+Authenticated routes expect `username` and `password` in the JSON body.
+Category creation and updates also use `name` and `notes`. Expense creation and
+updates use `qty`, `date_time` (`YYYY-MM-DD HH:MM:SS`), `notes`, and `category`
+(the category ID).
+
+Sign in:
+
+```sh
+curl -X POST http://localhost/users/signin \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"YOUR_USERNAME","password":"YOUR_PASSWORD"}'
+```
+
+List categories:
+
+```sh
+curl -X POST http://localhost/categories/ \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"YOUR_USERNAME","password":"YOUR_PASSWORD"}'
+```
+
+Create an expense:
+
+```sh
+curl -X POST http://localhost/expenses/add \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"YOUR_USERNAME","password":"YOUR_PASSWORD","qty":-12,"date_time":"2026-11-08 10:00:00","notes":"Lunch","category":1}'
+```
+
+Most endpoints currently respond with HTTP 200 even when authentication fails;
+in that case the JSON response is `null`. See `src/Controller` for response
+shapes and the exact behavior of each route.
 
 ## Docker Compose setup
 

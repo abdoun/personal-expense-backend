@@ -4,7 +4,7 @@ Navicat MySQL Data Transfer
 Source Server         : local_bash
 Source Server Version : 80020
 Source Host           : localhost:3306
-Source Database       : personal_expense
+Source Database       : pexpense
 
 Target Server Type    : MYSQL
 Target Server Version : 80020
